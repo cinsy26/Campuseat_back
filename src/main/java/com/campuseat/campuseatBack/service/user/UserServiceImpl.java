@@ -161,4 +161,10 @@ public class UserServiceImpl implements UserService{
     }
 
 
+    //로그인
+    @Override
+    public boolean login(String email, String password) {
+        return userRepository.findByEmailAndPassword(email, password).isPresent();
+    }
+
 }

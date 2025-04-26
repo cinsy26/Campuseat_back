@@ -6,8 +6,11 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UserService {
     EmailVerificationResponse verifyAndSendCode(String email, String univName);
-    EmailVerificationResponse checkVerificationCode(String email, String univName, int code); // 👈 추가
+    EmailVerificationResponse checkVerificationCode(String email, String univName, int code); //
 
     void signup(String email, String password, String nickname);
+
+    boolean login(String email, String password);
+
 
 }

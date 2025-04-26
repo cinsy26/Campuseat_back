@@ -40,6 +40,19 @@ dependencies {
 
 	implementation 'com.github.in-seo:univcert:master-SNAPSHOT'
 
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+
+	// QR 코드 생성용 ZXing
+	implementation 'com.google.zxing:core:3.5.1'
+	implementation 'com.google.zxing:javase:3.5.1'
+
+	// PDF 생성용 iText
+	implementation 'com.itextpdf:itextpdf:5.5.13.3'
+
+	// 이미지 처리
+	implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'
+
 }
 
 tasks.named('test') {
