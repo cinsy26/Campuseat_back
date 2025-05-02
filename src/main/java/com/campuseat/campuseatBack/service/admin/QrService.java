@@ -82,12 +82,12 @@ public class QrService {
             cell.setVerticalAlignment(Element.ALIGN_MIDDLE);   // 수직 가운데 (선택)
 
 // 이미지
-            pdfImage.setAlignment(Image.ALIGN_CENTER); // ✅ 이미지도 수평 가운데
+            pdfImage.setAlignment(Image.ALIGN_CENTER); //이미지 수평 가운데
             cell.addElement(pdfImage);
 
 // 텍스트
             Paragraph paragraph = new Paragraph();
-            paragraph.setAlignment(Element.ALIGN_CENTER); // ✅ 문단도 수평 가운데
+            paragraph.setAlignment(Element.ALIGN_CENTER); //문단도 수평 가운데
             paragraph.add(new Chunk(request.getBuildingName() + "\n", koreanFont));
             paragraph.add(new Chunk(request.getLocationName() + "\n", koreanFont));
             paragraph.add(new Chunk("좌석번호: " + (i + 1), koreanFont));
