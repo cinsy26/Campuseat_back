@@ -3,10 +3,12 @@ package com.campuseat.campuseatBack.entity.mapping;
 import com.campuseat.campuseatBack.entity.Seat;
 import com.campuseat.campuseatBack.entity.User;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 public class SeatUsageRecord {
     @Id
     @GeneratedValue

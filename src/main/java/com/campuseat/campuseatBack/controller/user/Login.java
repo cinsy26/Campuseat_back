@@ -17,13 +17,14 @@ public class Login {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest){
-        boolean success = userService.login(request.getEmail(), request.getPassword());
+        HttpSession session = httpRequest.getSession(true); // 먼저 세션 생성
+        boolean success = userService.login(request.getEmail(), request.getPassword(), session);
+
 
         if (!success) {
             return ResponseEntity.status(401).body("이메일 또는 비밀번호가 일치하지 않습니다.");
         }
 
-        HttpSession session = httpRequest.getSession(true);
         session.setAttribute("email", request.getEmail());
 
         return ResponseEntity.ok("로그인 성공");

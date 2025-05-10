@@ -1,7 +1,10 @@
 package com.campuseat.campuseatBack.service.user;
 
 import com.campuseat.campuseatBack.dto.user.EmailVerificationResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public interface UserService {
@@ -10,7 +13,7 @@ public interface UserService {
 
     void signup(String email, String password, String nickname);
 
-    boolean login(String email, String password);
+    boolean login(String email, String password, HttpSession session);
 
 
 }

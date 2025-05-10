@@ -2,7 +2,9 @@ package com.campuseat.campuseatBack.service.user;
 
 import com.campuseat.campuseatBack.dto.user.EmailVerificationResponse;
 import com.campuseat.campuseatBack.entity.User;
+import com.campuseat.campuseatBack.entity.enums.UserStatus;
 import com.campuseat.campuseatBack.repository.user.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -150,7 +152,7 @@ public class UserServiceImpl implements UserService{
                 .password(password)
                 .nickname(nickname)
                 .createdAt(LocalDateTime.now())
-                .status(1)
+                .status(UserStatus.DEFAULT)
                 .build();
 
         userRepository.save(newUser);
@@ -161,10 +163,15 @@ public class UserServiceImpl implements UserService{
     }
 
 
-    //로그인
+    // 세션 기반 로그인
     @Override
-    public boolean login(String email, String password) {
-        return userRepository.findByEmailAndPassword(email, password).isPresent();
+    public boolean login(String email, String password, HttpSession session) {
+        return userRepository.findByEmailAndPassword(email, password)
+                .map(user -> {
+                    session.setAttribute("user", user);
+                    return true;
+                })
+                .orElse(false);
     }
 
 }

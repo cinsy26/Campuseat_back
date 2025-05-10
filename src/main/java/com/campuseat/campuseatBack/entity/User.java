@@ -1,5 +1,6 @@
 package com.campuseat.campuseatBack.entity;
 
+import com.campuseat.campuseatBack.entity.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,7 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private int status;
-}
+    @Builder.Default
+    private UserStatus status = UserStatus.DEFAULT;}
