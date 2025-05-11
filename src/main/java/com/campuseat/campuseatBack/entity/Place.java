@@ -1,5 +1,6 @@
 package com.campuseat.campuseatBack.entity;
 
+import com.campuseat.campuseatBack.entity.mapping.UserFavoritePlace;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,4 +34,8 @@ public class Place {
 
     @OneToMany(mappedBy = "place")
     private List<Seat> seats;
+
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFavoritePlace> favoredByUsers;
+
 }
