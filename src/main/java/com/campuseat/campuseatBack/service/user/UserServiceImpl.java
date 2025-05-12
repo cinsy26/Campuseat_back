@@ -168,7 +168,7 @@ public class UserServiceImpl implements UserService{
     public boolean login(String email, String password, HttpSession session) {
         return userRepository.findByEmailAndPassword(email, password)
                 .map(user -> {
-                    session.setAttribute("user", user);
+                    session.setAttribute("loginUser", user);
                     return true;
                 })
                 .orElse(false);

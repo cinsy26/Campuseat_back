@@ -19,7 +19,7 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public Map<String, Object> getMyInfo(HttpSession session) {
-        User user = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("loginUser");
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
