@@ -11,7 +11,9 @@ import com.campuseat.campuseatBack.repository.seatInformation.PlaceRepository;
 import com.campuseat.campuseatBack.repository.seatInformation.SeatRepository;
 import com.campuseat.campuseatBack.repository.seatInformation.SeatUsageRecordRepository;
 import com.campuseat.campuseatBack.repository.user.UserRepository;
+import com.campuseat.campuseatBack.entity.enums.UserStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -78,6 +80,12 @@ public class ReservationServiceImpl implements ReservationService{
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
+        // 사용자의 기존 예약 확인
+        boolean hasExistingReservation = recordRepository.existsByUserUserIdAndEndedAtIsNull(userId);
+        if (hasExistingReservation) {
+            throw new IllegalStateException("이미 예약한 좌석이 있습니다.");
+        }
+
         // 좌석 상태 변경
         seat.setStatus(SeatStatus.SELECTED);
 
@@ -87,9 +95,39 @@ public class ReservationServiceImpl implements ReservationService{
         record.setUser(user);
         record.setReservedAt(LocalDateTime.now());
 
+        // 사용자 상태 변경
+        user.setStatus(UserStatus.RESERVED_SEAT);
+
         // 저장
         seatRepository.save(seat);
+        userRepository.save(user);
         recordRepository.save(record);
     }
 
+
+    //좌석 예약 취소(시간 만료)
+    @Scheduled(fixedRate = 60000) // 1분마다 실행
+    public void cancelExpiredReservations() {
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
+
+        List<SeatUsageRecord> expiredRecords = recordRepository
+                .findByReservedAtBeforeAndEndedAtIsNull(expirationTime);
+
+        for (SeatUsageRecord record : expiredRecords) {
+            Seat seat = record.getSeat();
+            User user = record.getUser();
+
+            // 상태 초기화
+            seat.setStatus(SeatStatus.AVAILABLE);
+            user.setStatus(UserStatus.DEFAULT);
+            record.setEndedAt(LocalDateTime.now());
+
+            seatRepository.save(seat);
+            userRepository.save(user);
+            recordRepository.save(record);
+        }
+    }
+
 }
+
+
