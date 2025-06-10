@@ -106,9 +106,16 @@ public class ReservationServiceImpl implements ReservationService{
 
 
     //좌석 예약 취소(시간 만료)
-    @Scheduled(fixedRate = 60000) // 1분마다 실행
+    @Scheduled(fixedRate = 60000)
     public void cancelExpiredReservations() {
-        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
+        LocalDateTime expirationTime;
+
+        try {
+            expirationTime = LocalDateTime.now().minusMinutes(15);
+        } catch (Exception e) {
+            // 만약 시간이 null이 되거나 뭔가 문제가 생기면 아주 과거 시간으로
+            expirationTime = LocalDateTime.of(1970, 1, 1, 0, 0);
+        }
 
         List<SeatUsageRecord> expiredRecords = recordRepository
                 .findByReservedAtBeforeAndEndedAtIsNull(expirationTime);
@@ -117,7 +124,6 @@ public class ReservationServiceImpl implements ReservationService{
             Seat seat = record.getSeat();
             User user = record.getUser();
 
-            // 상태 초기화
             seat.setStatus(SeatStatus.AVAILABLE);
             user.setStatus(UserStatus.DEFAULT);
             record.setEndedAt(LocalDateTime.now());
@@ -127,6 +133,7 @@ public class ReservationServiceImpl implements ReservationService{
             recordRepository.save(record);
         }
     }
+
 
 }
 
