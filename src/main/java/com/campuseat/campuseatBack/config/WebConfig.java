@@ -15,7 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:8081",
                         "http://10.0.2.2:8080",         // Android Emulator
                         "http://192.168.0.XXX:8080",    // 실제 기기에서 테스트할 경우 로컬 IP
-                        "https://your-frontend-domain.vercel.app"  // Vercel 등
+                        "https://your-frontend-domain.vercel.app",  // Vercel 등
+                        "http://52.79.181.144:8080"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(true)
