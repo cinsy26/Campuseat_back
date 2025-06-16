@@ -38,7 +38,7 @@ public class QrService {
         List<BufferedImage> qrImages = new ArrayList<>();
 
         for(int i = 1; i <= request.getSeatCount(); i++) {
-            String content = String.format("https://your-domain.com/seat/check?building=%s&location=%s&seat=%d",
+            String content = String.format("http://52.79.181.144:8080/seat/check?building=%s&location=%s&seat=%d",
                     request.getBuildingName(), request.getLocationName(), i);
             qrImages.add(generateQrImage(content));
         }

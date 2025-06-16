@@ -1,5 +1,6 @@
 package com.campuseat.campuseatBack.service.reservation;
 
+import com.campuseat.campuseatBack.dto.reservation.ConfirmSeatRequest;
 import com.campuseat.campuseatBack.dto.reservation.PlaceInfoResponse;
 import com.campuseat.campuseatBack.dto.reservation.SeatInfoResponse;
 import com.campuseat.campuseatBack.entity.Place;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -106,16 +108,9 @@ public class ReservationServiceImpl implements ReservationService{
 
 
     //좌석 예약 취소(시간 만료)
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60000) // 1분마다 실행
     public void cancelExpiredReservations() {
-        LocalDateTime expirationTime;
-
-        try {
-            expirationTime = LocalDateTime.now().minusMinutes(15);
-        } catch (Exception e) {
-            // 만약 시간이 null이 되거나 뭔가 문제가 생기면 아주 과거 시간으로
-            expirationTime = LocalDateTime.of(1970, 1, 1, 0, 0);
-        }
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
 
         List<SeatUsageRecord> expiredRecords = recordRepository
                 .findByReservedAtBeforeAndEndedAtIsNull(expirationTime);
@@ -124,6 +119,7 @@ public class ReservationServiceImpl implements ReservationService{
             Seat seat = record.getSeat();
             User user = record.getUser();
 
+            // 상태 초기화
             seat.setStatus(SeatStatus.AVAILABLE);
             user.setStatus(UserStatus.DEFAULT);
             record.setEndedAt(LocalDateTime.now());
@@ -134,7 +130,36 @@ public class ReservationServiceImpl implements ReservationService{
         }
     }
 
+    //좌석 예약 확정(qr)
+    @Override
+    public String confirmSeat(User user, ConfirmSeatRequest request) {
+        Seat seat = seatRepository.findByBuildingAndLocationAndName(
+                request.getBuilding(), request.getLocation(), request.getSeat()
+        ).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다."));
 
+        Optional<SeatUsageRecord> recordOpt = seatUsageRecordRepository
+                .findTopBySeatOrderByReservedAtDesc(seat);
+
+        if (recordOpt.isEmpty()) {
+            return "예약되지 않은 좌석입니다.";
+        }
+
+        SeatUsageRecord record = recordOpt.get();
+
+        if (!record.getUser().getId().equals(user.getId())) {
+            return "다른 사용자가 사용 중입니다.";
+        }
+
+        if (record.getConfirmedAt() != null) {
+            return "이미 확정된 좌석입니다.";
+        }
+
+        record.setConfirmedAt(LocalDateTime.now());
+        seatUsageRecordRepository.save(record);
+
+        return String.format("%s %s %s 좌석이 확정되었습니다.",
+                request.getBuilding(), request.getLocation(), request.getSeat());
+    }
 }
 
 
