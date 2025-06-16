@@ -32,7 +32,7 @@ public class ReservationController {
     @PostMapping("/confirmseat")
     public ResponseEntity<String> confirmSeat(@RequestBody ConfirmSeatRequest request,
                                               HttpSession session) {
-        User user = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("loginUser");
         if (user == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
