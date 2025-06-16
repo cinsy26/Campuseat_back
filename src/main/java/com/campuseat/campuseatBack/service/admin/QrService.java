@@ -27,6 +27,8 @@ import java.io.FileOutputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.URLEncoder;
+
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +40,12 @@ public class QrService {
         List<BufferedImage> qrImages = new ArrayList<>();
 
         for(int i = 1; i <= request.getSeatCount(); i++) {
-            String content = String.format("http://52.79.181.144:8080/seat/check?building=%s&location=%s&seat=%d",
-                    request.getBuildingName(), request.getLocationName(), i);
+            String content = String.format(
+                    "http://52.79.181.144:8080/seat/check?building=%s&location=%s&seat=%s",
+                    URLEncoder.encode(request.getBuildingName(), "UTF-8"),
+                    URLEncoder.encode(request.getLocationName(), "UTF-8"),
+                    URLEncoder.encode(i + "번", "UTF-8") // <--- 이 부분!
+            );
             qrImages.add(generateQrImage(content));
         }
 
