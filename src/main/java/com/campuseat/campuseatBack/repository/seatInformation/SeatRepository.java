@@ -22,4 +22,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
             @Param("seat") String seat
     );
 
+
+
 }

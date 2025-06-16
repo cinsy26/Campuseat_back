@@ -16,6 +16,7 @@ import com.campuseat.campuseatBack.entity.enums.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationServiceImpl implements ReservationService{
 
     private final PlaceRepository placeRepository;
@@ -134,36 +136,38 @@ public class ReservationServiceImpl implements ReservationService{
     //좌석 예약 확정(qr)
     @Override
     public String confirmSeat(User user, ConfirmSeatRequest request) {
+        // 1. 건물명, 장소명, 좌석명으로 좌석 찾기 (JOIN 기반 쿼리 사용)
         Seat seat = seatRepository.findSeatByNames(
                 request.getBuilding(), request.getLocation(), request.getSeat()
-        ).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다."));
+        ).orElseThrow(() -> new IllegalArgumentException("해당 조건에 맞는 좌석이 존재하지 않습니다."));
 
-
-
-
-        Optional<SeatUsageRecord> recordOpt = recordRepository
-                .findTopBySeatOrderByReservedAtDesc(seat);
+        // 2. 해당 좌석의 최신 예약 내역 가져오기
+        Optional<SeatUsageRecord> recordOpt = recordRepository.findTopBySeatOrderByReservedAtDesc(seat);
 
         if (recordOpt.isEmpty()) {
-            return "예약되지 않은 좌석입니다.";
+            return "예약 기록이 존재하지 않습니다.";
         }
 
         SeatUsageRecord record = recordOpt.get();
 
+        // 3. 유저 불일치 체크
         if (!record.getUser().getUserId().equals(user.getUserId())) {
-            return "다른 사용자가 사용 중입니다.";
+            return "해당 좌석은 다른 사용자가 예약했습니다.";
         }
 
+        // 4. 이미 확정된 경우
         if (record.getConfirmedAt() != null) {
             return "이미 확정된 좌석입니다.";
         }
 
+        // 5. 확정 처리
         record.setConfirmedAt(LocalDateTime.now());
         recordRepository.save(record);
 
-        return String.format("%s %s %s 좌석이 확정되었습니다.",
+        return String.format("[%s %s %s] 좌석이 확정되었습니다.",
                 request.getBuilding(), request.getLocation(), request.getSeat());
     }
+
 }
 
 
