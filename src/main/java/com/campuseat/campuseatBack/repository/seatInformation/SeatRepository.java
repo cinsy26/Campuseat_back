@@ -12,7 +12,8 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 
     Optional<Seat> findById(Long id);
 
-    Optional<Seat> findByBuilding_NameAndPlace_NameAndName(String building, String place, String seat);
+    @Query("SELECT s FROM Seat s WHERE s.building.name = :building AND s.place.name = :place AND s.name = :seat")
+    Optional<Seat> findByBuildingPlaceAndSeatName(@Param("building") String building, @Param("place") String place, @Param("seat") String seat);
 
 
 

@@ -134,9 +134,10 @@ public class ReservationServiceImpl implements ReservationService{
     //좌석 예약 확정(qr)
     @Override
     public String confirmSeat(User user, ConfirmSeatRequest request) {
-        Seat seat = seatRepository.findByBuilding_NameAndPlace_NameAndName(
+        Seat seat = seatRepository.findByBuildingPlaceAndSeatName(
                 request.getBuilding(), request.getLocation(), request.getSeat()
         ).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다."));
+
 
 
         Optional<SeatUsageRecord> recordOpt = recordRepository
