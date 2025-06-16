@@ -11,7 +11,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 
     Optional<Seat> findById(Long id);
 
-    Optional<Seat> findByBuildingAndLocationAndName(String building, String location, String name);
+    Optional<Seat> findByBuildingNameAndPlaceNameAndName(String building, String place, String seat);
 
 
 
