@@ -1,5 +1,6 @@
 package com.campuseat.campuseatBack.repository.seatInformation;
 
+import com.campuseat.campuseatBack.entity.Seat;
 import com.campuseat.campuseatBack.entity.User;
 import com.campuseat.campuseatBack.entity.mapping.SeatUsageRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +14,8 @@ public interface SeatUsageRecordRepository extends JpaRepository<SeatUsageRecord
     boolean existsByUserUserIdAndEndedAtIsNull(Long userId);
 
     List<SeatUsageRecord> findByReservedAtBeforeAndEndedAtIsNull(LocalDateTime time);
+
+    Optional<SeatUsageRecord> findTopBySeatOrderByReservedAtDesc(Seat seat);
+
 
 }

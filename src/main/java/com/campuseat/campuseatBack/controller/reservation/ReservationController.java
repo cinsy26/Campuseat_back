@@ -1,9 +1,11 @@
 package com.campuseat.campuseatBack.controller.reservation;
 
+import com.campuseat.campuseatBack.dto.reservation.ConfirmSeatRequest;
 import com.campuseat.campuseatBack.entity.User;
 import com.campuseat.campuseatBack.service.reservation.ReservationService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,4 +29,15 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/confirmseat")
+    public ResponseEntity<String> confirmSeat(@RequestBody ConfirmSeatRequest request,
+                                              HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        String result = reservationService.confirmSeat(user, request);
+        return ResponseEntity.ok(result);
+    }
 }

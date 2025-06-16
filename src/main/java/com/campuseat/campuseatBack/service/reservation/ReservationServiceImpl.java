@@ -1,5 +1,6 @@
 package com.campuseat.campuseatBack.service.reservation;
 
+import com.campuseat.campuseatBack.dto.reservation.ConfirmSeatRequest;
 import com.campuseat.campuseatBack.dto.reservation.PlaceInfoResponse;
 import com.campuseat.campuseatBack.dto.reservation.SeatInfoResponse;
 import com.campuseat.campuseatBack.entity.Place;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -128,6 +130,36 @@ public class ReservationServiceImpl implements ReservationService{
         }
     }
 
+    //좌석 예약 확정(qr)
+    @Override
+    public String confirmSeat(User user, ConfirmSeatRequest request) {
+        Seat seat = seatRepository.findByBuildingAndLocationAndName(
+                request.getBuilding(), request.getLocation(), request.getSeat()
+        ).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다."));
+
+        Optional<SeatUsageRecord> recordOpt = seatUsageRecordRepository
+                .findTopBySeatOrderByReservedAtDesc(seat);
+
+        if (recordOpt.isEmpty()) {
+            return "예약되지 않은 좌석입니다.";
+        }
+
+        SeatUsageRecord record = recordOpt.get();
+
+        if (!record.getUser().getId().equals(user.getId())) {
+            return "다른 사용자가 사용 중입니다.";
+        }
+
+        if (record.getConfirmedAt() != null) {
+            return "이미 확정된 좌석입니다.";
+        }
+
+        record.setConfirmedAt(LocalDateTime.now());
+        seatUsageRecordRepository.save(record);
+
+        return String.format("%s %s %s 좌석이 확정되었습니다.",
+                request.getBuilding(), request.getLocation(), request.getSeat());
+    }
 }
 
 
