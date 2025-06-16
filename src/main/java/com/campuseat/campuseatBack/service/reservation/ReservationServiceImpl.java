@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ReservationServiceImpl implements ReservationService{
 
     private final PlaceRepository placeRepository;
