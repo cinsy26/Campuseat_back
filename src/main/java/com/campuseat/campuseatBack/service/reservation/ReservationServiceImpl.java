@@ -36,6 +36,7 @@ public class ReservationServiceImpl implements ReservationService{
 
 
 
+
     //장소 프론트로 보내기
     @Override
     public List<PlaceInfoResponse> getAllPlaceInfo() {
@@ -133,11 +134,11 @@ public class ReservationServiceImpl implements ReservationService{
     //좌석 예약 확정(qr)
     @Override
     public String confirmSeat(User user, ConfirmSeatRequest request) {
-        Seat seat = seatRepository.findByBuildingAndLocationAndName(
+        Seat seat = seatRepository.findByBuildingNameAndPlaceNameAndName(
                 request.getBuilding(), request.getLocation(), request.getSeat()
         ).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다."));
 
-        Optional<SeatUsageRecord> recordOpt = seatUsageRecordRepository
+        Optional<SeatUsageRecord> recordOpt = recordRepository
                 .findTopBySeatOrderByReservedAtDesc(seat);
 
         if (recordOpt.isEmpty()) {
@@ -146,7 +147,7 @@ public class ReservationServiceImpl implements ReservationService{
 
         SeatUsageRecord record = recordOpt.get();
 
-        if (!record.getUser().getId().equals(user.getId())) {
+        if (!record.getUser().getUserId().equals(user.getUserId())) {
             return "다른 사용자가 사용 중입니다.";
         }
 
@@ -155,7 +156,7 @@ public class ReservationServiceImpl implements ReservationService{
         }
 
         record.setConfirmedAt(LocalDateTime.now());
-        seatUsageRecordRepository.save(record);
+        recordRepository.save(record);
 
         return String.format("%s %s %s 좌석이 확정되었습니다.",
                 request.getBuilding(), request.getLocation(), request.getSeat());
