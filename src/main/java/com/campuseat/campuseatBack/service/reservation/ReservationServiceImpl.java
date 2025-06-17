@@ -163,8 +163,84 @@ public class ReservationServiceImpl implements ReservationService{
         record.setConfirmedAt(LocalDateTime.now());
         recordRepository.save(record);
 
+        // 6. 사용자 상태 변경
+        user.setStatus(UserStatus.USING_SEAT);
+        userRepository.save(user);
+
         return String.format("[%s %s %s] 좌석이 확정되었습니다.",
                 request.getBuilding(), request.getLocation(), request.getSeat());
+    }
+
+    @Override
+    @Transactional
+    public String processBreak(User user) {
+        Optional<SeatUsageRecord> recordOpt = recordRepository.findTopByUserOrderByReservedAtDesc(user);
+        if (recordOpt.isEmpty()) {
+            return "예약 기록이 없습니다.";
+        }
+
+        SeatUsageRecord record = recordOpt.get();
+
+        if (record.getOutCount() >= 1) {
+            return "외출은 1회만 가능합니다.";
+        }
+
+        record.setOutAt(LocalDateTime.now());
+        record.setOutCount(record.getOutCount() + 1);
+        recordRepository.save(record);
+
+        user.setStatus(UserStatus.ON_BREAK);
+        userRepository.save(user);
+
+        return "외출 처리 완료";
+    }
+
+    @Override
+    @Transactional
+    public String processReturn(User user) {
+        Optional<SeatUsageRecord> recordOpt = recordRepository.findTopByUserOrderByReservedAtDesc(user);
+        if (recordOpt.isEmpty()) {
+            return "반납할 좌석 정보가 없습니다.";
+        }
+
+        SeatUsageRecord record = recordOpt.get();
+
+        record.setReturnedAt(LocalDateTime.now());
+        recordRepository.save(record);
+
+        user.setStatus(UserStatus.DEFAULT);
+        userRepository.save(user);
+
+        return "좌석 반납이 완료되었습니다.";
+    }
+
+    @Override
+    public String returnFromBreak(User user) {
+        // 1. 유저 상태 체크
+        if (user.getStatus() != UserStatus.ON_BREAK) {
+            return "외출 중인 상태가 아니므로 복귀할 수 없습니다.";
+        }
+
+        // 2. 최신 좌석 사용 기록 가져오기
+        Optional<SeatUsageRecord> recordOpt =
+                recordRepository.findTopByUserOrderByReservedAtDesc(user);
+
+        if (recordOpt.isEmpty()) {
+            return "좌석 사용 기록이 존재하지 않습니다.";
+        }
+
+        SeatUsageRecord record = recordOpt.get();
+
+        // 3. 외출 중 상태인지 확인
+        if (record.getOutAt() == null || record.getReturnedAt() != null) {
+            return "복귀 가능한 외출 기록이 없습니다.";
+        }
+
+        // 4. 복귀 처리 (단순히 상태만 복구)
+        user.setStatus(UserStatus.USING_SEAT);
+        userRepository.save(user);  // 상태 저장
+
+        return "복귀 처리 완료되었습니다.";
     }
 
 }

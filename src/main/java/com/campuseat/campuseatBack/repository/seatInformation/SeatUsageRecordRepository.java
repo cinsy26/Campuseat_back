@@ -17,5 +17,7 @@ public interface SeatUsageRecordRepository extends JpaRepository<SeatUsageRecord
 
     Optional<SeatUsageRecord> findTopBySeatOrderByReservedAtDesc(Seat seat);
 
+    Optional<SeatUsageRecord> findTopByUserOrderByReservedAtDesc(User user);
+
 
 }

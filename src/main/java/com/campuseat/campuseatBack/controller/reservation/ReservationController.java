@@ -40,4 +40,41 @@ public class ReservationController {
         String result = reservationService.confirmSeat(user, request);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/out")
+    public ResponseEntity<String> takeBreak(HttpSession session) {
+        User user = (User) session.getAttribute("loginUser");
+        if (user == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        String result = reservationService.processBreak(user);
+        if (result.equals("외출 불가")) {
+            return ResponseEntity.status(400).body(result);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/return")
+    public ResponseEntity<String> returnSeat(HttpSession session) {
+        User user = (User) session.getAttribute("loginUser");
+        if (user == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        String result = reservationService.processReturn(user);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/return-from-break")
+    public ResponseEntity<String> returnFromBreak(HttpSession session) {
+        User user = (User) session.getAttribute("loginUser");
+        if (user == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        String result = reservationService.returnFromBreak(user);
+        return ResponseEntity.ok(result);
+    }
+
 }
