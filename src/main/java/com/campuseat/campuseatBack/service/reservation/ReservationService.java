@@ -22,5 +22,8 @@ public interface ReservationService {
 
     //좌석 예약 확정
     String confirmSeat(User user, ConfirmSeatRequest request);
+    String processBreak(User user);   // 외출 처리
+    String processReturn(User user);  // 좌석 반납
+    String returnFromBreak(User user);
 
 }
